@@ -182,13 +182,14 @@ class FluxPDF(object):
 
     def compute_p_map(self, q, std_map, Imin, alpha=-0.7):
         lf = self.log_flux + alpha * np.log10(144. / 1400.)
-        p_map = np.zeros(len(std_map))
-        for ip, std in enumerate(std_map):
-            if std > 0:
-                Ithr = max(q * std, Imin)
-                x = (Ithr - 10.**lf) / (np.sqrt(2.) * std)
-                comp = 0.5 * (1 - erf(x))
-                p_map[ip] = np.sum(self.probs * comp)
+        Ithr = np.maximum(q*std_map, Imin)
+        x = np.divide((Ithr[:, None] - 10**lf),
+                      np.sqrt(2)*std_map[:, None],
+                      out=np.zeros((len(std_map), len(lf))),
+                      where=(std_map!=0)[:, None])
+        self.comp = 0.5 * (1 - erf(x))
+        p_map = np.sum(self.probs * self.comp, axis=1)
+        p_map[np.isclose(p_map, 0.5)] = 0
         return p_map
 
     def draw_random_fluxes(self, n, alpha=-0.7, lf_thr_low=-3.5):
@@ -330,7 +331,7 @@ def get_params_sampler_default():
              'value': 1.3,
              'prior': {'type': 'TopHat',
                        'values': [0.6, 6.0]}},
-            
+
             {'name': 'sigma8',
              'label': '\\sigma_8',
              'vary': False,
@@ -398,7 +399,7 @@ def mk_sampler_params(prefix_in, nz_choice, bz_choice, nz_sample, bz_sample,
 
     if bz_sample:
         p['params'][0]['vary'] = True
-    
+
     fname = 'sampler_'
     fname += 'nz'+nz_choice+'_'
     if bz_choice == 'inv_growth':
