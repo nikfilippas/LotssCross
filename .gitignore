@@ -1,11 +1,14 @@
-data/*.fits
-data/*.pdf
-data/*.txt
-data/*.tar
-data/*/*
-outputs/*
-*/*.fits
-__pycache__
+# Directories
+data/
+outputs/
+plots/
+tests/
+__pycache__/
+.spyproject/
+
+
+# Files
+*.fits
 *.tmp
 python*
 .bashrc

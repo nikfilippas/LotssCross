@@ -14,6 +14,7 @@ nside = 256
 npix = hp.nside2npix(nside)
 
 data = fits.open(fname_DR2)[1].data
+#TODO: remove gals with S<2
 ipix = hp.ang2pix(nside, data["RA"], data["DEC"], lonlat=True)
 
 sigmap = np.bincount(ipix, weights=data["Isl_rms"], minlength=npix)
@@ -30,4 +31,4 @@ ngal = np.bincount(ipix, minlength=npix)
 n_mean = np.sum(ngal*p_map) / np.sum(p_map)
 ngal = p_map*(ngal/(n_mean*p_map) - 1)
 ngal = np.nan_to_num(ngal)
-hp.write_map("data/LoTSS_DR2_Delta_g_map.fits", ngal, overwrite=True)
+# hp.write_map("data/LoTSS_DR2_Delta_g_map.fits", ngal, overwrite=True)
